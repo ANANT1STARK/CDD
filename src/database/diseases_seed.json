@@ -1,0 +1,57 @@
+[
+  {
+    "disease_id": "gumosis",
+    "name": "Gummosis",
+    "crop_type": "Cashew",
+    "status": "diseased",
+    "pathogen": "Lasiodiplodia theobromae (fungus)",
+    "description": "Symptoms appear as swollen cankers on the trunk or woody branches, which crack over time and ooze a transparent, resin-like gum. It reduces water and nutrient transport within the tree, and in severe cases leads to branch dieback or plant death. Symptoms typically appear only after the tree's second year, once woody tissue has developed.",
+    "severity": "Severe",
+    "solution": "Surgically remove the infected canker tissue, cutting back to healthy wood, then apply a copper-based fungicide paste to the cut surface to protect it until it heals.",
+    "prevention": "No fully reliable control method exists once an epidemic sets in \u2014 resistant/tolerant cashew varieties are the most effective long-term defense. Minimize trunk and bark injuries during pruning or weeding, since wounds are the primary entry point for infection.",
+    "note": "Considered one of the most damaging cashew diseases in affected regions, as there is currently no fully effective cure once severe."
+  },
+  {
+    "disease_id": "healthy",
+    "name": "Healthy",
+    "crop_type": "Cashew",
+    "status": "healthy",
+    "description": "No signs of disease detected. Leaves show normal color, texture, and growth pattern for a healthy cashew plant.",
+    "severity": "None",
+    "solution": "No treatment needed. Continue regular monitoring and standard care practices.",
+    "prevention": "Maintain regular watering, balanced fertilization, and periodic inspection for early signs of pests or disease."
+  },
+  {
+    "disease_id": "anthracnose",
+    "name": "Anthracnose",
+    "crop_type": "Cashew",
+    "status": "diseased",
+    "pathogen": "Colletotrichum gloeosporioides (fungal complex)",
+    "description": "Affects leaves, shoots, flowers, and nuts. Appears as reddish-brown necrotic spots on young leaves and branches, darkening to brown/black as the tissue matures. Infected nuts and peduncles develop dark, often cracked spots. The disease is most severe in wet conditions with mild temperatures (around 25\u00b0C) and can cause yield losses of up to 40% in bad seasons.",
+    "severity": "Severe",
+    "solution": "Apply fungicides such as copper oxychloride, azoxystrobin, or difenoconazole. Prune and remove infected shoots, leaves, and fruit to reduce spread.",
+    "prevention": "Use resistant or tolerant cashew clones where available. Maintain good orchard hygiene and pruning to improve airflow, since the disease spreads faster in humid, poorly ventilated canopies."
+  },
+  {
+    "disease_id": "red_dust",
+    "name": "Red Rust (Red Dust)",
+    "crop_type": "Cashew",
+    "status": "diseased",
+    "pathogen": "Cephaleuros virescens (parasitic alga, not a fungus)",
+    "description": "Appears as small, circular, orange-to-red lesions on the upper leaf surface, which can coalesce into larger patches as the infection spreads. It is caused by a parasitic alga rather than a fungus, though it's often mistaken for a fungal rust.",
+    "severity": "Mild",
+    "solution": "Copper-based fungicides (such as copper oxychloride) are commonly used to manage Cephaleuros infections. Removing heavily affected leaves can reduce spore load.",
+    "prevention": "Prune to improve canopy airflow and reduce excess humidity and shade, both of which favor algal growth and spread."
+  },
+  {
+    "disease_id": "leaf_miner",
+    "name": "Leaf Miner",
+    "crop_type": "Cashew",
+    "status": "diseased",
+    "pathogen": "Acrocercops syngramma (moth larvae, Gracillariidae: Lepidoptera)",
+    "description": "Larvae tunnel into the epidermal layer of tender leaves and feed on the mesophyll beneath the surface, creating blistered, greyish-white patches. On older leaves, the mined areas dry out and crumble, leaving large holes. Most common during post-monsoon flush periods, peaking around October-November.",
+    "severity": "Mild",
+    "solution": "Natural larval parasitoids often keep infestations in check without spraying. If chemical control is needed, insecticide sprays (e.g. dichlorvos or dimethoate) combined with a fish oil rosin soap are commonly used, targeting the new flush.",
+    "prevention": "Monitor new leaf flushes closely, especially post-monsoon. Digging over soil at the base of the tree can help destroy pupating larvae before they emerge as adults. Encourage natural parasitoid populations rather than routine spraying."
+  }
+]

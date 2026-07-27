@@ -11,16 +11,31 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 // Expects route.params = { result, imageUri }
-// result shape: { status: 'confident', disease, confidence, severity, solution, prevention }
+// result shape (from MongoDB):
+// { disease_id, name, crop_type, status: 'healthy' | 'diseased', pathogen,
+//   description, severity, solution, prevention, note }
 
 export default function ResultScreen({ route, navigation }) {
   const { result, imageUri } = route.params;
-  const { disease, confidence, severity, solution, prevention } = result;
+  const {
+    name,
+    crop_type,
+    status,
+    pathogen,
+    description,
+    severity,
+    solution,
+    prevention,
+    note,
+  } = result;
+
+  const isHealthy = status === 'healthy';
 
   const severityColors = {
     Mild: { bg: '#1e2b1e', text: '#81c784' },
     Moderate: { bg: '#332b12', text: '#ffb74d' },
     Severe: { bg: '#331414', text: '#e57373' },
+    None: { bg: '#1e2b1e', text: '#81c784' },
   };
   const severityStyle = severityColors[severity] || severityColors.Moderate;
 
@@ -41,22 +56,40 @@ export default function ResultScreen({ route, navigation }) {
 
         <View style={styles.content}>
           <View style={styles.titleRow}>
-            <Text style={styles.diseaseName}>{disease}</Text>
-            <View style={[styles.severityBadge, { backgroundColor: severityStyle.bg }]}>
-              <Text style={[styles.severityText, { color: severityStyle.text }]}>
-                {severity}
-              </Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.diseaseName}>{name}</Text>
+              <Text style={styles.cropType}>{crop_type}</Text>
             </View>
+            {severity ? (
+              <View style={[styles.severityBadge, { backgroundColor: severityStyle.bg }]}>
+                <Text style={[styles.severityText, { color: severityStyle.text }]}>
+                  {severity}
+                </Text>
+              </View>
+            ) : null}
           </View>
-          <Text style={styles.confidenceText}>{Math.round(confidence * 100)}% confidence</Text>
+
+          {pathogen ? (
+            <Text style={styles.pathogenText}>{pathogen}</Text>
+          ) : null}
 
           <View style={styles.divider} />
 
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionIcon}>{'\u2695'}</Text>
-            <Text style={styles.sectionTitle}>Solution</Text>
+            <Text style={styles.sectionIcon}>{'\u2139'}</Text>
+            <Text style={styles.sectionTitle}>What's happening</Text>
           </View>
-          <Text style={styles.sectionText}>{solution}</Text>
+          <Text style={styles.sectionText}>{description}</Text>
+
+          {!isHealthy && solution ? (
+            <>
+              <View style={styles.sectionRow}>
+                <Text style={styles.sectionIcon}>{'\u2695'}</Text>
+                <Text style={styles.sectionTitle}>Solution</Text>
+              </View>
+              <Text style={styles.sectionText}>{solution}</Text>
+            </>
+          ) : null}
 
           {prevention ? (
             <>
@@ -66,6 +99,12 @@ export default function ResultScreen({ route, navigation }) {
               </View>
               <Text style={styles.sectionText}>{prevention}</Text>
             </>
+          ) : null}
+
+          {note ? (
+            <View style={styles.noteBox}>
+              <Text style={styles.noteText}>{note}</Text>
+            </View>
           ) : null}
 
           <View style={styles.buttonRow}>
@@ -127,7 +166,7 @@ const styles = StyleSheet.create({
   },
   titleRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
   diseaseName: {
@@ -135,19 +174,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#f2f2f2',
   },
+  cropType: {
+    fontSize: 13,
+    color: '#9a9a9a',
+    marginTop: 2,
+  },
+  pathogenText: {
+    fontSize: 12,
+    color: '#7a7a7a',
+    fontStyle: 'italic',
+    marginTop: 8,
+  },
   severityBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
+    marginLeft: 10,
   },
   severityText: {
     fontSize: 12,
     fontWeight: '600',
-  },
-  confidenceText: {
-    fontSize: 13,
-    color: '#9a9a9a',
-    marginTop: 4,
   },
   divider: {
     height: 0.5,
@@ -174,6 +220,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#c9c9c9',
     lineHeight: 21,
+  },
+  noteBox: {
+    marginTop: 18,
+    padding: 12,
+    backgroundColor: '#1e1e1e',
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#666',
+  },
+  noteText: {
+    fontSize: 12,
+    color: '#a0a0a0',
+    lineHeight: 18,
+    fontStyle: 'italic',
   },
   buttonRow: {
     flexDirection: 'row',

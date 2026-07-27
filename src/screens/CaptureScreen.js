@@ -63,7 +63,7 @@ export default function CaptureScreen({ navigation }) {
       });
 
       // Replace with your computer's local IP (not localhost) — e.g. http://192.168.1.42:8000
-      const response = await fetch('http://10.221.36.235:8000/predict', {
+      const response = await fetch('http://10.221.36.148:8000/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'multipart/form-data' },
         body: formData,

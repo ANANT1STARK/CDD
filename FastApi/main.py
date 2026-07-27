@@ -1,6 +1,11 @@
-from fastapi import FastAPI, File, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
+import os
 import random
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+
+load_dotenv()  # reads variables from a local .env file
 
 app = FastAPI(title="Crop Disease Prediction API")
 
@@ -13,49 +18,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---- Dummy data: stands in for your trained model + database lookup ----
-# Replace this with real model inference + DB query once ready.
-DUMMY_DISEASES = [
-    {
-        "status": "confident",
-        "disease": "Leaf Blight",
-        "confidence": 0.87,
-        "severity": "Moderate",
-        "solution": "Remove affected leaves and apply a copper-based fungicide. Avoid overhead watering.",
-        "prevention": "Avoid overhead watering; ensure proper spacing between plants for airflow.",
-    },
-    {
-        "status": "confident",
-        "disease": "Powdery Mildew",
-        "confidence": 0.93,
-        "severity": "Mild",
-        "solution": "Spray with a sulfur-based fungicide or neem oil. Improve air circulation around plants.",
-        "prevention": "Avoid overcrowding plants; water at the base rather than on leaves.",
-    },
-    {
-        "status": "low_confidence",
-        "disease": "Bacterial Spot",
-        "confidence": 0.52,
-        "matches": [
-            {"disease": "Bacterial Spot", "confidence": 0.52},
-            {"disease": "Leaf Blight", "confidence": 0.31},
-        ],
-    },
-    {
-        "status": "no_match",
-    },
-]
+# ---- MongoDB connection ----
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = os.getenv("DB_NAME")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
+client = AsyncIOMotorClient(MONGO_URI)
+db = client[DB_NAME]
+diseases_collection = db[COLLECTION_NAME]
+
+# ---- Stand-in for your trained model ----
+# Once your model is ready, replace this with real inference that outputs one of these labels.
+DISEASE_CLASSES = ["gumosis", "anthracnose", "leaf_miner", "red_dust", "healthy"]
 
 
 @app.get("/")
-def health_check():
+async def health_check():
     return {"status": "ok", "message": "Crop Disease Prediction API is running"}
 
 
 @app.post("/predict")
 async def predict(image: UploadFile = File(...)):
-    # For now: ignore the actual image content and return a random dummy result,
-    # just so the app has real request/response round trips to test against.
-    contents = await image.read()  # confirms the upload actually arrives
-    result = random.choice(DUMMY_DISEASES)
+    # Confirms the upload actually arrives — not used for prediction yet.
+    contents = await image.read()
+
+    # TEMP: randomly pick a class to simulate the model's output.
+    # Replace this line with your real model's prediction once it's ready.
+    predicted_disease_id = random.choice(DISEASE_CLASSES)
+
+    # Look up the matching document in MongoDB using the predicted label.
+    result = await diseases_collection.find_one({"disease_id": predicted_disease_id})
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No database entry found for disease_id '{predicted_disease_id}'",
+        )
+
+    # MongoDB's _id (ObjectId) isn't JSON-serializable by default — convert to string.
+    result["_id"] = str(result["_id"])
     return result
