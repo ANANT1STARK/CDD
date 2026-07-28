@@ -1,8 +1,0 @@
-fastapi
-uvicorn[standard]
-python-multipart
-motor
-python-dotenv
-tensorflow
-pillow
-numpy
