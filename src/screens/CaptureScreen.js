@@ -56,13 +56,12 @@ export default function CaptureScreen({ navigation }) {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('image', {
+      formData.append('file', {
         uri: imageUri,
         type: 'image/jpeg',
         name: 'crop_photo.jpg',
       });
 
-      // Replace with your computer's local IP (not localhost) — e.g. http://192.168.1.42:8000
       const response = await fetch('http://10.221.36.148:8000/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'multipart/form-data' },

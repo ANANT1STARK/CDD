@@ -11,25 +11,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 // Expects route.params = { result, imageUri }
-// result shape (from MongoDB):
-// { disease_id, name, crop_type, status: 'healthy' | 'diseased', pathogen,
-//   description, severity, solution, prevention, note }
+// result.status is one of: 'confident' | 'low_confidence' | 'not_cashew'
+//
+// confident shape: { disease_id, name, crop_type, status, pathogen,
+//   description, severity, solution, prevention, note, confidence }
+// low_confidence shape: { status, predicted_class, confidence, message, top_guess }
+// not_cashew shape: { status, predicted_class, confidence, message }
 
 export default function ResultScreen({ route, navigation }) {
   const { result, imageUri } = route.params;
-  const {
-    name,
-    crop_type,
-    status,
-    pathogen,
-    description,
-    severity,
-    solution,
-    prevention,
-    note,
-  } = result;
-
-  const isHealthy = status === 'healthy';
+  const { status } = result;
 
   const severityColors = {
     Mild: { bg: '#1e2b1e', text: '#81c784' },
@@ -37,6 +28,90 @@ export default function ResultScreen({ route, navigation }) {
     Severe: { bg: '#331414', text: '#e57373' },
     None: { bg: '#1e2b1e', text: '#81c784' },
   };
+
+  // ---- Not a cashew leaf at all ----
+  if (status === 'not_cashew') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={styles.backArrow}>{'\u2190'}</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Result</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+
+        <View style={styles.centerContent}>
+          <View style={styles.imageBoxSmall}>
+            <Image source={{ uri: imageUri }} style={styles.image} />
+          </View>
+          <Text style={styles.stateIcon}>{'\u26A0'}</Text>
+          <Text style={styles.stateTitle}>Not a cashew leaf</Text>
+          <Text style={styles.stateMessage}>{result.message}</Text>
+
+          <TouchableOpacity
+            style={styles.standaloneButton}
+            onPress={() => navigation.navigate('Capture')}
+          >
+            <Text style={styles.secondaryButtonText}>Retake photo</Text>
+          </TouchableOpacity>
+        </View>
+        <StatusBar style="light" />
+      </SafeAreaView>
+    );
+  }
+
+  // ---- Low confidence: model isn't sure ----
+  if (status === 'low_confidence') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={styles.backArrow}>{'\u2190'}</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Result</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+
+        <View style={styles.centerContent}>
+          <View style={styles.imageBoxSmall}>
+            <Image source={{ uri: imageUri }} style={styles.image} />
+          </View>
+          <Text style={styles.stateIcon}>{'\u2753'}</Text>
+          <Text style={styles.stateTitle}>Not fully sure</Text>
+          <Text style={styles.stateMessage}>{result.message}</Text>
+          {result.top_guess ? (
+            <Text style={styles.topGuessText}>
+              Best guess: {result.top_guess} ({Math.round(result.confidence * 100)}%)
+            </Text>
+          ) : null}
+
+          <TouchableOpacity
+            style={styles.standaloneButton}
+            onPress={() => navigation.navigate('Capture')}
+          >
+            <Text style={styles.secondaryButtonText}>Retake photo</Text>
+          </TouchableOpacity>
+        </View>
+        <StatusBar style="light" />
+      </SafeAreaView>
+    );
+  }
+
+  // ---- Confident prediction — full disease details from MongoDB ----
+  const {
+    name,
+    crop_type,
+    pathogen,
+    description,
+    severity,
+    solution,
+    prevention,
+    note,
+    confidence,
+  } = result;
+
+  const isHealthy = status === 'healthy';
   const severityStyle = severityColors[severity] || severityColors.Moderate;
 
   return (
@@ -69,8 +144,9 @@ export default function ResultScreen({ route, navigation }) {
             ) : null}
           </View>
 
-          {pathogen ? (
-            <Text style={styles.pathogenText}>{pathogen}</Text>
+          {pathogen ? <Text style={styles.pathogenText}>{pathogen}</Text> : null}
+          {typeof confidence === 'number' ? (
+            <Text style={styles.confidenceText}>{Math.round(confidence * 100)}% confidence</Text>
           ) : null}
 
           <View style={styles.divider} />
@@ -156,6 +232,14 @@ const styles = StyleSheet.create({
     height: 220,
     backgroundColor: '#1e1e1e',
   },
+  imageBoxSmall: {
+    width: 160,
+    height: 160,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#1e1e1e',
+    marginBottom: 20,
+  },
   image: {
     width: '100%',
     height: '100%',
@@ -163,6 +247,33 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+  },
+  centerContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  stateIcon: {
+    fontSize: 32,
+    marginBottom: 12,
+  },
+  stateTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#f2f2f2',
+    marginBottom: 8,
+  },
+  stateMessage: {
+    fontSize: 14,
+    color: '#c9c9c9',
+    textAlign: 'center',
+    lineHeight: 21,
+  },
+  topGuessText: {
+    fontSize: 13,
+    color: '#9a9a9a',
+    marginTop: 10,
   },
   titleRow: {
     flexDirection: 'row',
@@ -184,6 +295,11 @@ const styles = StyleSheet.create({
     color: '#7a7a7a',
     fontStyle: 'italic',
     marginTop: 8,
+  },
+  confidenceText: {
+    fontSize: 13,
+    color: '#9a9a9a',
+    marginTop: 4,
   },
   severityBadge: {
     paddingHorizontal: 10,
@@ -248,6 +364,16 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     alignItems: 'center',
     backgroundColor: 'rgba(76, 175, 80, 0.08)',
+  },
+  standaloneButton: {
+    borderWidth: 2,
+    borderColor: '#4caf50',
+    borderRadius: 10,
+    paddingVertical: 13,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    backgroundColor: 'rgba(76, 175, 80, 0.08)',
+    marginTop: 24,
   },
   secondaryButtonText: {
     fontSize: 15,
